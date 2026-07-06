@@ -19,6 +19,8 @@ export default function LeadTable({
   statusFilter,
   setStatusFilter,
   onDeleteClick,
+  onEditClick,
+  onStatusChange,
 }) {
   return (
     <div>
@@ -81,12 +83,20 @@ export default function LeadTable({
                   {new Date(lead.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </td>
                 <td className="px-5 py-3.5 text-right">
-                  <button
-                    onClick={() => onDeleteClick(lead)}
-                    className="text-xs text-gray-300 group-hover:text-red-500 transition-colors hover:underline"
-                  >
-                    Remove
-                  </button>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => onEditClick(lead)}
+                      className="text-xs text-blue-500 hover:text-blue-700 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => onDeleteClick(lead)}
+                      className="text-xs text-red-500 hover:text-red-700 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

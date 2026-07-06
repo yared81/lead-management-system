@@ -53,6 +53,37 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.patch('/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { name, email, status } = req.body;
+
+    if (email && !isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    const updated = await prisma.lead.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(email && { email }),
+        ...(status && { status }),
+      },
+    });
+
+    res.json(updated);
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update lead' });
+  }
+});
+
 router.delete('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);

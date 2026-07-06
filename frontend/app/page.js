@@ -4,6 +4,7 @@ import LeadForm from '../components/LeadForm';
 import LeadTable from '../components/LeadTable';
 import Toast from '../components/Toast';
 import DeleteModal from '../components/DeleteModal';
+import EditModal from '../components/EditModal';
 
 export default function Home() {
   const [leads, setLeads] = useState([]);
@@ -12,6 +13,7 @@ export default function Home() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [toast, setToast] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -48,6 +50,28 @@ export default function Home() {
       showToast('Delete failed', 'error');
     } finally {
       setDeleteTarget(null);
+    }
+  };
+
+  const handleUpdateLead = async (id, data) => {
+    try {
+      const res = await fetch(`${apiUrl}/leads/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setLeads(prev => prev.map(l => l.id === id ? updated : l));
+        showToast('Lead updated successfully');
+      } else {
+        const errorData = await res.json();
+        showToast(errorData.error || 'Update failed', 'error');
+      }
+    } catch (err) {
+      showToast('Network error during update', 'error');
+    } finally {
+      setEditTarget(null);
     }
   };
 
@@ -112,6 +136,8 @@ export default function Home() {
               statusFilter={statusFilter}
               setStatusFilter={setStatusFilter}
               onDeleteClick={setDeleteTarget}
+              onEditClick={setEditTarget}
+              onStatusChange={(id, status) => handleUpdateLead(id, { status })}
             />
           )}
         </div>
@@ -121,6 +147,12 @@ export default function Home() {
         lead={deleteTarget}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteTarget(null)}
+      />
+
+      <EditModal
+        lead={editTarget}
+        onSave={handleUpdateLead}
+        onCancel={() => setEditTarget(null)}
       />
 
       {toast && <Toast message={toast.message} type={toast.type} />}
