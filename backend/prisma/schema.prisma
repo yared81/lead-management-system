@@ -13,6 +13,9 @@ model Lead {
   email     String   @unique
   status    Status   @default(New)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
 }
 
 enum Status {

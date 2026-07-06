@@ -4,12 +4,18 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-// GET /leads → Fetch all leads
+const isValidEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
 router.get('/', async (req, res) => {
   try {
-    const leads = await prisma.lead.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    const { status } = req.query;
+    const query = { orderBy: { createdAt: 'desc' } };
+    
+    if (status) query.where = { status };
+
+    const leads = await prisma.lead.findMany(query);
     res.json(leads);
   } catch (error) {
     console.error(error);
@@ -17,22 +23,31 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /leads → Add a new lead
 router.post('/', async (req, res) => {
   try {
     const { name, email, status } = req.body;
+    
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Name and email are required' });
+    }
+    
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
     
     const newLead = await prisma.lead.create({
       data: {
         name,
         email,
-        // Prisma will default to 'New' if status is undefined, 
-        // but we pass it explicitly if provided
         status: status || 'New',
       },
     });
+    
     res.status(201).json(newLead);
   } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
     console.error(error);
     res.status(500).json({ error: 'Failed to create lead' });
   }
