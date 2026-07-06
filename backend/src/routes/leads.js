@@ -53,4 +53,18 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    await prisma.lead.delete({ where: { id } });
+    res.json({ message: 'Lead deleted' });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete lead' });
+  }
+});
+
 module.exports = router;
