@@ -2,7 +2,7 @@
 
 A full-stack Lead Management application built as a technical assessment. It features a Node.js/Express backend, a Next.js frontend, and a PostgreSQL database managed via Prisma.
 
-## Live Demo (Bonus)
+## Live Demo 
 - **Frontend**: https://lead-management-system-w.vercel.app/
 - **Backend API**: https://lead-management-system-j3sm.onrender.com
 
